@@ -1,0 +1,65 @@
+{
+  "root": "apps/frontend",
+  "sourceRoot": "apps/frontend",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/next:build",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "maxWorkers": 4,
+        "memoryLimits": 3072,
+        "optimization": true,
+        "progress": true,
+        "sourceMap": false,
+        "statsJson": true,
+        "verbose": true,
+        "externalDependencies": "all",
+        "generatePackageJson": true,
+        "root": "apps/frontend",
+        "outputPath": "apps/frontend/build"
+      },
+      "configurations": {
+        "production": {}
+      }
+    },
+    "serve": {
+      "executor": "@nrwl/next:server",
+      "options": {
+        "buildTarget": "frontend:build",
+        "port": 4200,
+        "dev": true,
+        "hostname": "localhost"
+      },
+      "configurations": {
+        "production": {
+          "buildTarget": "frontend:build:production",
+          "dev": false
+        }
+      }
+    },
+    "export": {
+      "executor": "@nrwl/next:export",
+      "options": {
+        "buildTarget": "frontend:build:production"
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/apps/frontend"],
+      "options": {
+        "jestConfig": "apps/frontend/jest.config.js",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/frontend/**/*.{ts,tsx,js,jsx}"]
+      }
+    }
+  },
+  "tags": []
+}

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>1013204251190-4vsb2d8vt4df5ue51074qcsdsiihtj7g.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.1013204251190-4vsb2d8vt4df5ue51074qcsdsiihtj7g</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>1013204251190-p3c6cqvrb148fmorelvbd1gdio7io3qr.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyCNkBLblQKCb9dab_saqq1tbKk0TRya2Hc</string>
+	<key>GCM_SENDER_ID</key>
+	<string>1013204251190</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.bangmaple.app</string>
+	<key>PROJECT_ID</key>
+	<string>fptu-library-booking</string>
+	<key>STORAGE_BUCKET</key>
+	<string>fptu-library-booking.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:1013204251190:ios:a32e3569c5ca4f4fe51e97</string>
+</dict>
+</plist>

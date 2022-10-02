@@ -1,0 +1,147 @@
+version: '3'
+
+services:
+
+  database:
+    container_name: database
+    image: postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: 12345678x@X
+      PGDATA: /data/postgres
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/1-init.sql
+      - $PWD/docker/pg:/data/postgres
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - app
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@fpt.edu.vn}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+       - $PWD/docker/pgadmin:/var/lib/pgadmin
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    networks:
+      - app
+    depends_on:
+      - database
+    restart: unless-stopped
+
+  frontend:
+    container_name: frontend
+    build:
+      context: ./apps/frontend
+      dockerfile: ./Dockerfile
+    ports:
+      - "80:3000"
+    volumes:
+      - ./apps/frontend/build/.next:/frontend/.next
+      - ./apps/frontend/build:/frontend
+      - ./node_modules:/frontend/node_modules
+      - .env:/frontend/.env
+    networks:
+      - app
+    depends_on:
+      - backend
+
+  backend:
+    container_name: backend
+    build:
+      context: ./apps/backend
+      dockerfile: ./Dockerfile
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./apps/backend/dist:/backend
+      - ./node_modules:/backend/node_modules
+    networks:
+      - app
+    depends_on:
+      - database
+      - keycloak
+
+  phpmyadmin:
+    container_name: phpmyadmin
+    links:
+      - keycloak-database
+    #hostname: localhost
+    image: phpmyadmin
+    restart: always
+    ports:
+      - "8080:80"
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOST=keycloak-database
+      - MYSQL_ROOT_PASSWORD=12345678x@X
+    networks:
+      - app
+    depends_on:
+      - keycloak-database
+
+  keycloak-database:
+    container_name: keycloak-database
+    image: mysql:5.7
+    volumes:
+      - ./keycloakdb-init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - mysql_keycloak_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 12345678x@X
+      MYSQL_DATABASE: keycloak
+      MYSQL_USER: keycloak
+      MYSQL_PASSWORD: password
+    ports:
+      - "3307:3306"
+    restart: unless-stopped
+    networks:
+      - app
+
+  keycloak:
+    container_name: keycloak
+    image: quay.io/keycloak/keycloak:16.1.0
+    command: -b 0.0.0.0 -Dkeycloak.profile=preview
+    restart: on-failure
+    environment:
+      KC_HTTPS_CERTIFICATE_FILE: /opt/keycloak/conf/keycloak-server.crt.pem
+      KC_HTTPS_CERTIFICATE_KEY_FILE: /opt/keycloak/conf/keycloak-server.key.pem
+      PROXY_ADDRESS_FORWARDING: "true"
+      DB_VENDOR: MYSQL
+      DB_ADDR: keycloak-database
+      DB_DATABASE: keycloak
+      DB_USER: keycloak
+      DB_PASSWORD: password
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: 12345678x@X
+      REDIRECT_SOCKET: "proxy-https"
+      # Uncomment the line below if you want to specify JDBC parameters. The parameter below is just an example, and it shouldn't be used in production without knowledge. It is highly recommended that you read the MySQL JDBC driver documentation in order to use it.
+      #JDBC_PARAMS: "connectTimeout=30000"
+    volumes:
+      - $PWD/keycloak-server.crt.pem:/opt/keycloak/conf/keycloak-server.crt.pem
+      - $PWD/keycloak-server.key.pem:/opt/keycloak/conf/keycloak-server.key.pem
+    ports:
+      - "9990:9990"
+      - "9090:8080"
+      - "8443:8443"
+    networks:
+      - app
+    depends_on:
+      - keycloak-database
+
+volumes:
+  backend:
+    driver: local
+  mysql_data:
+    driver: local
+  mysql_keycloak_data:
+    driver: local
+
+networks:
+  app:
+    driver: bridge

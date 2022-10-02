@@ -1,0 +1,18 @@
+module.exports = {
+  displayName: 'mobile',
+  preset: 'react-native',
+  testRunner: 'jest-jasmine2',
+  resolver: '@nrwl/jest/plugins/resolver',
+  moduleFileExtensions: ['ts', 'js', 'html', 'tsx', 'jsx'],
+  setupFilesAfterEnv: ['<rootDir>/test-setup.ts'],
+  moduleNameMapper: {
+    '.svg': '@nrwl/react-native/plugins/jest/svg-mock',
+  },
+  modulePathIgnorePatterns: ['<rootDir>/package.json', '<rootDir>/dist/apps/app/package.json'],
+  transform: {
+    '\\.(js|ts|tsx)$': require.resolve('react-native/jest/preprocessor.js'),
+    '^.+\\.(bmp|gif|jpg|jpeg|mp4|png|psd|svg|webp)$': require.resolve(
+      'react-native/jest/assetFileTransformer.js'
+    ),
+  },
+};

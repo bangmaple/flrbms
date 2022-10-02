@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "projects": {
+    "backend": "apps/backend",
+    "constants": "libs/constants",
+    "frontend": "apps/frontend",
+    "mobile": "apps/mobile",
+    "models": "libs/models",
+    "utils": "libs/utils"
+  }
+}

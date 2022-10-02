@@ -1,0 +1,25 @@
+maxBookingDateRange: 14
+maxDeviceBorrowQuantity: 100
+maxBookingRequestPerWeek: 3
+maxRoomCapacity: 1000
+slots:
+  slot1:
+    name: Slot 1
+    start: '07:00:00'
+    end: '09:15:00'
+  slot2:
+    name: Slot 2
+    start: '09:45:00'
+    end: '12:00:00'
+  slot3:
+    name: Slot 3
+    start: '12:30:00'
+    end: '14:45:00'
+  slot4:
+    name: Slot 4
+    start: '15:15:00'
+    end: '17:30:00'
+  slot5:
+    name: Slot 5
+    start: '18:00:00'
+    end: '20:15:00'

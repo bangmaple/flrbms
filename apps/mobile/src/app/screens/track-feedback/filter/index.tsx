@@ -1,0 +1,345 @@
+import React, {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useState,
+} from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { GRAY, WHITE } from '@app/constants';
+import { deviceWidth } from '../../../utils/device';
+import {
+  CalendarIcon,
+  ChevronDoubleRightIcon,
+  TagIcon,
+} from 'react-native-heroicons/outline';
+import RNPickerSelect from 'react-native-picker-select';
+import { useAppNavigation } from '../../../hooks/use-app-navigation.hook';
+import { useAppDispatch } from '../../../hooks/use-app-dispatch.hook';
+import dayjs from 'dayjs';
+import { useAppSelector } from '../../../hooks/use-app-selector.hook';
+import {
+  resetGlobalDateEnd,
+  resetGlobalDateStart,
+} from '../../../redux/features/room-booking/slice';
+import TrackBookingRoomFilterStatusSelection from './status-selection';
+import { fetchAllFeedBackTypes } from '../../../redux/features/feed-back-type/thunk/fetch-all-feed-back-types.thunk';
+
+interface TrackBookingRoomFilterHandler {
+  fromDate: string;
+  toDate: string;
+  type: string;
+  status: string[] | undefined;
+}
+
+interface TrackBookingRoomFilterProps {
+  handleFilterSearch(): void;
+}
+
+const TrackFeedbackFilter: React.ForwardRefRenderFunction<
+  TrackBookingRoomFilterHandler,
+  TrackBookingRoomFilterProps
+> = (props, ref) => {
+  const navigate = useAppNavigation();
+  const dispatch = useAppDispatch();
+
+  const { feedbackTypes } = useAppSelector((state) => state.feedbackTypes);
+
+  useEffect(() => {
+    dispatch(fetchAllFeedBackTypes())
+      .unwrap()
+      .catch((e) => alert(JSON.stringify(e)));
+  }, []);
+
+  const { globalDateStart, globalDateEnd } = useAppSelector(
+    (state) => state.roomBooking
+  );
+
+  const [status, setStatus] = useState<string[]>([]);
+  const [feedbackType, setFeedbackType] = useState<string>();
+
+  const handleSearch = () => {
+    props.handleFilterSearch();
+  };
+
+  useEffect(() => {
+    handleSearch();
+  }, [feedbackType, globalDateStart, globalDateEnd, status]);
+
+  useEffect(() => {
+    if (!feedbackType) {
+      setFeedbackType(undefined);
+    }
+  }, [feedbackType]);
+
+  useImperativeHandle(ref, () => ({
+    type: feedbackType,
+    fromDate: globalDateStart,
+    toDate: globalDateEnd,
+    status: status.length > 0 ? status : undefined,
+  }));
+
+
+  const handleClearFilter = useCallback(() => {
+    setFeedbackType(undefined);
+    setStatus([]);
+    dispatch(resetGlobalDateStart());
+    dispatch(resetGlobalDateEnd());
+  }, []);
+
+  return (
+    <View>
+      <View style={styles.container}>
+        <Text
+          style={{
+            color: GRAY,
+            fontWeight: '600',
+            fontSize: deviceWidth / 23,
+          }}
+        >
+          FILTER
+        </Text>
+        <TouchableOpacity
+          onPress={() => handleClearFilter()}
+          style={styles.clearFilterButton}
+        >
+          <Text style={styles.clearFilterInputText}>CLEAR</Text>
+        </TouchableOpacity>
+      </View>
+      <View
+        style={{
+          height: 150,
+          width: deviceWidth / 1.05,
+          backgroundColor: WHITE,
+          borderRadius: 8,
+          alignSelf: 'center',
+        }}
+      >
+      <View style={{
+        paddingVertical: 10,
+        paddingHorizontal: 10,
+        flexDirection: 'row',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+      }}>
+        <View style={{
+
+          flexDirection: 'row'
+        }}>
+          <View style={{
+            borderTopLeftRadius: 8,
+            borderBottomLeftRadius: 8,
+            borderWidth: 2,
+            borderColor: GRAY,
+            height: 35,
+            width: 35,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
+            <TagIcon size={deviceWidth / 16} color={GRAY}/>
+          </View>
+          <RNPickerSelect  style={{
+            viewContainer: {
+              borderTopWidth: 2,
+              borderRightWidth: 2,
+              borderBottomWidth: 2,
+              borderTopRightRadius: 8,
+              borderBottomRightRadius: 8,
+              borderColor: GRAY,
+              display: 'flex',
+              width: deviceWidth / 1.23,
+              justifyContent: 'center',
+            },
+            inputAndroid: {
+              height: 35,
+              color: GRAY
+            },
+            inputIOSContainer: {
+              paddingHorizontal: 10
+            }
+          }} onValueChange={(e) => setFeedbackType(e)} items={feedbackTypes.map((type) => {
+            return {
+              label: type.name,
+              value: type.name
+            }
+          })}/>
+        </View>
+      </View>
+        <View
+          style={{
+            paddingHorizontal: 10,
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
+          <TouchableOpacity
+            onPress={() =>
+              navigate.navigate('CALENDAR_SELECT', {
+                type: 'dateStart',
+              })
+            }
+            style={{ display: 'flex', flexDirection: 'row' }}
+          >
+            <View style={styles.leftIconSlotFilter}>
+              <CalendarIcon color={GRAY} size={deviceWidth / 16} />
+            </View>
+            <View
+              style={{
+                borderWidth: 2,
+                borderColor: GRAY,
+                borderTopRightRadius: 8,
+                borderBottomRightRadius: 8,
+                height: 35,
+                width: deviceWidth / 3.8,
+                display: 'flex',
+                justifyContent: 'center',
+                paddingHorizontal: 10,
+              }}
+            >
+              <Text
+                style={{
+                  color: GRAY,
+                  fontWeight: '500',
+                  fontSize: deviceWidth / 32,
+                }}
+              >
+                {dayjs(globalDateStart).format('DD/MM/YYYY')}
+              </Text>
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => null}
+            style={styles.switchIconContainer}
+          >
+            <ChevronDoubleRightIcon color={GRAY} size={deviceWidth / 16} />
+          </TouchableOpacity>
+
+          <View style={{ display: 'flex', flexDirection: 'row' }}>
+            <View style={styles.leftIconSlotFilter}>
+              <CalendarIcon color={GRAY} size={deviceWidth / 16} />
+            </View>
+            <TouchableOpacity
+              onPress={() =>
+                navigate.navigate('CALENDAR_SELECT', {
+                  type: 'dateEnd',
+                })
+              }
+              style={{
+                borderWidth: 2,
+                borderColor: GRAY,
+                borderTopRightRadius: 8,
+                borderBottomRightRadius: 8,
+                height: 35,
+                width: deviceWidth / 3.8,
+                display: 'flex',
+                justifyContent: 'center',
+                paddingHorizontal: 10,
+              }}
+            >
+              <Text
+                style={{
+                  color: GRAY,
+                  fontWeight: '500',
+                  fontSize: deviceWidth / 32,
+                }}
+              >
+                {dayjs(globalDateEnd).format('DD/MM/YYYY')}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <TrackBookingRoomFilterStatusSelection
+          status={status}
+          setStatus={setStatus}
+          handleSearch={handleSearch}
+        />
+      </View>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    flexDirection: 'row',
+    margin: 10,
+  },
+  clearFilterButton: {
+    height: 20,
+    width: 50,
+    borderRadius: 8,
+    backgroundColor: GRAY,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  clearFilterInputText: {
+    color: WHITE,
+    fontWeight: '500',
+    fontSize: deviceWidth / 34,
+  },
+  searchInputContainer: {
+    marginLeft: 10,
+    marginRight: 10,
+    marginTop: 10,
+    display: 'flex',
+    flexDirection: 'row',
+  },
+  searchInputIcon: {
+    height: 35,
+    width: 35,
+    borderTopLeftRadius: 8,
+    borderBottomLeftRadius: 8,
+    borderColor: GRAY,
+    borderWidth: 2,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  searchInput: {
+    height: 35,
+    borderTopRightRadius: 8,
+    borderBottomRightRadius: 8,
+    borderColor: GRAY,
+    borderTopWidth: 2,
+    borderBottomWidth: 2,
+    borderRightWidth: 2,
+    width: deviceWidth / 1.23,
+    paddingHorizontal: 10,
+  },
+  leftIconSlotFilter: {
+    height: 35,
+    width: 35,
+    borderTopColor: GRAY,
+    borderLeftColor: GRAY,
+    borderBottomColor: GRAY,
+    borderTopWidth: 2,
+    borderLeftWidth: 2,
+    borderBottomWidth: 2,
+    borderBottomLeftRadius: 8,
+    borderTopLeftRadius: 8,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  switchIconContainer: {
+    height: 35,
+    width: 35,
+    borderWidth: 2,
+    borderColor: GRAY,
+    borderRadius: 8,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});
+
+export default forwardRef(TrackFeedbackFilter);
